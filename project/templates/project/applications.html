@@ -1,0 +1,137 @@
+{% extends "layout.html" %}
+{% load static from staticfiles %}
+{% load project_extras %}
+
+{% block title %}{{ block.super }} | Applications{% endblock %}
+
+{% block js %}
+<script>
+jQuery(function() {
+  $(document).on("click", ".position_select", function(){
+    position = $(this).closest('td').data('position');
+    project = $(this).closest('td').data('project');
+    openModal();
+
+    $.ajax({
+        "type": "POST",
+        "dataType": "json",
+        "url": "/project/select/",
+        "data": {"project": project, "position": position},
+        "beforeSend": function(xhr, settings) {
+            $.ajaxSettings.beforeSend(xhr, settings);
+        },
+        "success": function(result) {
+          if (result['result'] == "success") {
+            location.reload(true);
+          }
+        }
+    }).done(function(data){ closeModal(); });
+  });
+
+  $(document).on("click", ".position_reject", function(){
+    position = $(this).closest('td').data('position');
+    project = $(this).closest('td').data('project');
+    openModal();
+
+    $.ajax({
+        "type": "POST",
+        "dataType": "json",
+        "url": "/project/reject/",
+        "data": {"project": project, "position": position},
+        "beforeSend": function(xhr, settings) {
+            $.ajaxSettings.beforeSend(xhr, settings);
+        },
+        "success": function(result) {
+          if (result['result'] == "success") {
+            location.reload(true);
+          }
+        }
+    }).done(function(data){ closeModal(); });
+  });
+
+});
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="circle--actions--bar">
+  <nav class="bounds">
+    <ul class="circle--pill--list">
+      <li><a class="selected">Applications</a></li>
+      <li><a href="{% url 'profile:profile' pk=current_user.id %}">Profile</a></li>
+      <li><a href="{% url 'project:recommended' %}">Recommended</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div class="bounds circle--page">
+  <div class="circle--page--header grid-100">
+    <h2>My Projects' Applications</h2>
+  </div>
+
+  <div class="grid-25">
+    <div class="circle--filter circle--secondary--module">
+      <h4>Status</h4>
+      <ul class="circle--filter--list">
+        <li><a href="{% url 'project:applications' %}{% if show_projects %}?project={{ show_projects }}{% endif %}{% if show_position %}{% if show_projects %}&{% else %}?{% endif %}position={{ show_position }}{% endif %}"{% if not show_applications %}class="selected"{% endif %}>All Applications</a></li>
+        <li><a href="{% url 'project:applications' %}?application=applied{% if show_projects %}&project={{ show_projects }}{% endif %}{% if show_position %}&position={{ show_position }}{% endif %}" {% ifequal show_applications|lower 'applied' %}class="selected"{% endifequal %}>Applied</a></li>
+        <li><a href="{% url 'project:applications' %}?application=selected{% if show_projects %}&project={{ show_projects }}{% endif %}{% if show_position %}&position={{ show_position }}{% endif %}" {% ifequal show_applications|lower 'selected' %}class="selected"{% endifequal %}>Selected</a></li>
+        <li><a href="{% url 'project:applications' %}?application=rejected{% if show_projects %}&project={{ show_projects }}{% endif %}{% if show_position %}&position={{ show_position }}{% endif %}" {% ifequal show_applications|lower 'rejected' %}class="selected"{% endifequal %}>Rejected</a></li>
+      </ul>
+    </div>
+
+    <div class="circle--filter circle--secondary--module">
+      <h4>My Projects</h4>
+      <ul class="circle--filter--list">
+        <li><a href="{% url 'project:applications' %}{% if show_position %}?position={{ show_position }}{% endif %}{% if show_applications %}{% if show_position %}&{% else %}?{% endif %}application={{ show_applications }}{% endif %}" {% if not show_projects %}class="selected"{% endif %}>All Projects</a></li>
+        {% for project in projects %}
+        <li><a href="{% url 'project:applications' %}?project={{ project.title|urlencode|lower }}{% if show_position %}&position={{ show_position }}{% endif %}{% if show_applications %}&application={{ show_applications }}{% endif %}" {% ifequal show_projects|lower project.title|lower %}class="selected"{% endifequal %}>{{ project.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="circle--filter circle--secondary--module">
+      <h4>My Projects' Positions</h4>
+      <ul class="circle--filter--list">
+        <li><a href="{% url 'project:applications' %}{% if show_projects %}?project={{ show_projects }}{% endif %}{% if show_applications %}{% if show_projects %}&{% else %}?{% endif %}application={{ show_applications }}{% endif %}" {% if not show_position %}class="selected"{% endif %}>All Positions</a></li>
+        {% for position in positions %}
+        <li><a href="{% url 'project:applications' %}?position={{ position.title|lower }}{% if show_projects %}&project={{ show_projects }}{% endif %}{% if show_applications %}&application={{ show_applications }}{% endif %}" {% ifequal show_position|lower position.title|lower %}class="selected"{% endifequal %}>{{ position.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="grid-70 grid-push-5">
+    <table class="u-full-width circle--table">
+      <thead>
+        <tr>
+          <th>Applicant</th>
+          <th class="circle--cell--right">Applicant Position</th>
+          <th class="circle--cell--right">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if applications %}
+          {% for apply in applications %}
+          <tr>
+            <td>
+              <h3><a href="{% url 'profile:profile' pk=apply.user.id %}">{{ apply.user }}</a></h3>
+              <p>{{ apply.position.project.title }}</p>
+            </td>
+            <td class="circle--cell--right">
+              <a class="secondary-label" href="{% url 'project:project' pk=apply.position.project.id %}">{{ apply.position.title }}</a>
+            </td>
+            <td data-position="{{ apply.id }}" data-project="{{ apply.position.project.id }}">
+              {{ apply.status|status_buttons|safe }}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td align="center" colspan="3"><h2>Sorry, no results matched your criteria</h2></td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

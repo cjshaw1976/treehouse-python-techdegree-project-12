@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+{% load static from staticfiles %}
+{% load markdown_deux_tags %}
+
+{% block title %}{{ block.super }} | Profile Edit{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="{% static "js/jquery.autocomplete.js" %}"></script>
+<script>
+jQuery(function() {
+
+    // Add autocomplete to skills
+    $('.skill_autocomplete').autocomplete({ serviceUrl: '/ajax/skills/', autoSelectFirst: true});
+
+    $( '.skill_autocomplete' ).on( "autocompleteReturn", function (e) {
+      add_skill();
+    });
+
+    // Add skill Click
+    $(document).on("click", "#skill_add", function(){
+      add_skill();
+    });
+
+    function add_skill() {
+      if($('.skill_autocomplete').val()){
+        var item = $('.skill_autocomplete').val();
+
+        // Check if skill already in list
+        var exists = $(".circle--clone--list span").filter(function() {
+            return $(this).text() === item;
+        }).length;
+
+        if (exists == 0){
+          // Add to my skills
+          $.ajax({
+              "type": "POST",
+              "dataType": "json",
+              "url": "/ajax/skills/add/",
+              "data": {"title": item},
+              "beforeSend": function(xhr, settings) {
+                  //console.log("Before Send");
+                  $.ajaxSettings.beforeSend(xhr, settings);
+              },
+              "success": function(result) {
+                if (result['result'] == "success") {
+                  // Add list item
+                  var list_item = '<li><span>'+item+'</span><a class="skill_remove">Remove</a></li>';
+                  $('#skill_list').append(list_item);
+                }
+              }
+          });
+        }
+
+        // reset search
+        $('.skill_autocomplete').val('');
+        $('.skill_autocomplete').autocomplete('clear');
+      }
+    }
+
+    // Remove Skill Click
+    $(document).on("click", ".skill_remove", function(){
+      var parent = $(this).parent("li");
+      var skill = parent.children('span').text();
+
+      // Remove from my skills
+      $.ajax({
+          "type": "POST",
+          "dataType": "json",
+          "url": "/ajax/skills/remove/",
+          "data": {"title": skill},
+          "beforeSend": function(xhr, settings) {
+              //console.log("Before Send");
+              $.ajaxSettings.beforeSend(xhr, settings);
+          },
+          "success": function(result) {
+              if (result['result'] == "success") {
+                // Remove from list
+                parent.remove();
+              }
+          }
+      });
+    });
+});
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="circle--actions--bar">
+  <nav class="bounds">
+    <ul class="circle--pill--list">
+      <li><a href="{% url 'project:applications' %}">Applications</a></li>
+      <li><a class="selected">Profile</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div class="bounds circle--page">
+  <form method="POST" action="{% url 'profile:profile_edit' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="circle--page--header circle--fluid">
+        <div class="circle--fluid--cell circle--fluid--primary">
+          <h2>Profile</h2>
+        </div>
+        <div class="circle--fluid--cell circle--fluid--secondary">
+          <input type="submit" class="button-primary" value="Save Changes">
+        </div>
+      </div>
+
+      <div class="grid-70">
+        {{ form.non_field_errors }}
+
+        <input name="username" id="id_username" required="" autofocus=""
+              placeholder="User Name" maxlength="150" type="text"
+              class="circle--input--h1 {% if form.username.errors %}error{% endif %}"
+              value="{% if form.username.value %}{{ form.username.value }} {% else %}{{ current_user.username }}{% endif %}">
+        {{ form.username.errors }}
+
+        <input name="email" id="id_email" required="" autocomplete="off"
+              {% if form.email.errors %}class="error"{% endif %}
+              type="email" placeholder="Email Address"
+              value="{% if form.email.value %}{{ form.email.value }} {% else %}{{ current_user.email }}{% endif %}">
+        {{ form.email.errors }}
+
+        <div class="circle--article--body">
+          <textarea {% if form.bio.errors %}class="error"{% endif %} name="bio"
+              placeholder="Tell us about yourself...">{{ form.bio.value }}</textarea>
+          {% autoescape off %}{% markdown_allowed %}{% endautoescape %}
+          {{ form.bio.errors }}
+        </div>
+
+      </div>
+
+      <div class="grid-25 grid-push-5">
+
+        <div class="circle--secondary--module">
+          <div id="avatar_background" class="circle--primary--avatar" style="background-image: url('{% if current_user.profile.avatar.url != None %}{{ current_user.profile.avatar.url }}{% endif %}');">
+            <a class="button">
+              <span>Upload Photo</span>
+              <input name="avatar" type="file" id="id_avatar">
+            </a>
+          </div>
+        </div>
+
+        <div class="circle--secondary--module">
+          <h4>My Skills</h4>
+          <div class="InputAddOn">
+            <input type="text" placeholder="Skill" class="InputAddOn-field skill_autocomplete" />
+            <a id="skill_add" class="button button-primary InputAddOn-item">+</a>
+          </div>
+          <ul id="skill_list" class="circle--clone--list">
+            {% for skill in skills %}
+                <li><span>{{ skill.skill.title }}</span><a class="skill_remove">Remove</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+
+      </div>
+    </form>
+</div>
+{% endblock %}

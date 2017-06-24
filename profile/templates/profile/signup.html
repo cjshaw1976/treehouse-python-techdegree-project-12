@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ block.super }} | Sign Up{% endblock %}
+
+{% block body %}
+<div class="bounds circle--page">
+  <div class="grid-30 centered">
+    <h2>Sign Up</h2>
+    <form method="POST" action="{% url 'profile:signup' %}">
+        {% csrf_token %}
+        <input name="username" id="id_username" {% if form.username.errors %}class="error"{% endif %}
+              required="" autofocus="" placeholder="User Name" maxlength="150"
+              type="text" autocomplete="off">
+        {{ form.username.errors }}
+        <input name="email" id="id_email" {% if form.email.errors %}class="error"{% endif %}
+              required="" placeholder="Email Address" type="email" autocomplete="off">
+        {{ form.email.errors }}
+        <input name="password1" required="" id="id_password1"
+              {% if form.password1.errors %}class="error"{% endif %}
+              placeholder="Password" type="password">
+        {{ form.password1.errors }}
+        <input name="password2" required="" id="id_password2"
+              {% if form.password2.errors %}class="error"{% endif %}
+              placeholder="Confirm Password" type="password">
+        {{ form.password2.errors }}
+        <input type="submit" class="button-primary" value="Sign Up">
+        <a class="button" href="{% url 'profile:signin' %}">Sign In</a>
+        <input type="hidden" name="next" value="{{ next }}" />
+    </form>
+  </div>
+</div>
+{% endblock %}

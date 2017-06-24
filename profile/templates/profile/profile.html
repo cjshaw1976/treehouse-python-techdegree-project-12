@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+{% load profile_extras %}
+{% load markdown_deux_tags %}
+
+{% block title %}{{ block.super }} | Profile{% endblock %}
+
+{% block body %}
+{% ifequal user current_user %}
+<div class="circle--actions--bar">
+  <nav class="bounds">
+    <ul class="circle--pill--list">
+      <li><a href="{% url 'project:applications' %}">Applications</a></li>
+      <li><a class="selected">Profile</a></li>
+      <li><a href="{% url 'project:recommended' %}">Recommended</a></li>
+    </ul>
+  </nav>
+</div>
+{% endifequal %}
+
+<div class="bounds circle--page">
+  <div class="circle--page--header circle--fluid">
+    <div class="circle--fluid--cell circle--fluid--primary">
+      <h2>Profile</h2>
+    </div>
+    <div class="circle--fluid--cell circle--fluid--secondary">
+      {% ifequal user current_user %}
+      <a class="button icon-on-left" href="{% url 'profile:profile_edit' %}">Edit</a>
+      {% endifequal %}
+    </div>
+  </div>
+
+  <div class="grid-70">
+    <h1>{{ profile.user }}</h1>
+    <div class="circle--article--body">
+      {{ profile.bio|markdown }}
+    </div>
+
+    <h2>My Projects</h2>
+    <table class="u-full-width circle--table">
+      <thead>
+        <tr>
+          <th>Project Title</th>
+          <th class="circle--cell--right">Project Needs</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if projects %}
+          {% for project in projects %}
+          <tr class="clickable-row" data-href="{% url 'project:project' pk=project.pk %}">
+            <td>
+              <h3>{{ project.title }}</h3>
+            </td>
+            <td class="circle--cell--right">
+              <span class="secondary-label">{{ project|available_positions }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td align="center" colspan="2"><h2>I have not created any projects yet.</h2></td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid-25 grid-push-5">
+
+    <div class="circle--secondary--module">
+      <div id="avatar_background" class="circle--primary--avatar" style="background-image: url('{% if profile.avatar.url != None %}{{ profile.avatar.url }}{% endif %}');">
+      </div>
+    </div>
+
+    <div class="circle--secondary--module">
+      <h4>My Skills</h4>
+      <ul class="unloaded">
+        {% if skills %}
+          {% for skill in skills %}
+            <li>{{ skill.skill.title }}</li>
+          {% endfor %}
+        {% else %}
+          <li><b>No Skills Selected Yet</b></li>
+        {% endif %}
+      </ul>
+    </div>
+
+    <div class="circle--secondary--module">
+      <h4>Project Assignments</h4>
+      <ul class="circle--link--list">
+        {% if positions %}
+          {% for position in positions %}
+          <li><a href="{% url 'project:project' pk=position.position.project.pk %}">{{ position.position }}</a></li>
+          {% endfor %}
+        {% else %}
+          <li><b>No Positions Assigned Yet</b></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

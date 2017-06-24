@@ -1,0 +1,259 @@
+
+/*
+  For auto complete suggestions
+  https://github.com/devbridge/jQuery-Autocomplete#styling
+*/
+.autocomplete-suggestions { border: 1px solid #999; background: #FFF; overflow: auto; }
+.autocomplete-suggestion { padding: 2px 5px; white-space: nowrap; overflow: hidden; }
+.autocomplete-selected { background: #F0F0F0; }
+.autocomplete-suggestions strong { font-weight: normal; color: #3399FF; }
+.autocomplete-group { padding: 2px 5px; }
+.autocomplete-group strong { display: block; border-bottom: 1px solid #000; }
+
+.InputAddOn {
+  display: flex;
+  margin-bottom: 1.5em;
+}
+
+.InputAddOn-field {
+  flex: 1;
+  margin-bottom: 10px !important;
+}
+.InputAddOn-field:not(:first-child) {
+  border-left: 0;
+}
+.InputAddOn-field:not(:last-child) {
+  border-right: 0;
+}
+
+.InputAddOn-item {
+  background-color: rgba(147, 128, 108, 0.1);
+  color: #666666;
+  font: inherit;
+  font-weight: normal;
+}
+
+.InputAddOn-field,
+.InputAddOn-item {
+  border: 1px solid rgba(147, 128, 108, 0.25);
+  padding: 0.5em 0.75em;
+}
+.InputAddOn-field:first-child,
+.InputAddOn-item:first-child {
+  border-radius: 8px 0 0 8px;
+}
+.InputAddOn-field:last-child,
+.InputAddOn-item:last-child {
+  border-radius: 0 2px 2px 0;
+}
+
+.position-delete {
+  opacity: 0;
+}
+
+/* different colour buttons */
+.button.button-warning, input[type="submit"].button-warning,
+input[type="reset"].button-warning,
+input[type="button"].button-warning,
+button.button-warning {
+  color: #fff;
+  background-color: #B23D00;
+  box-shadow: none;
+}
+
+.button.button-warning svg, input[type="submit"].button-warning svg,
+input[type="reset"].button-warning svg,
+input[type="button"].button-warning svg,
+button.button-warning svg {
+  fill: #fff;
+}
+
+.button.button-warning:hover, input[type="submit"].button-warning:hover,
+input[type="reset"].button-warning:hover,
+input[type="button"].button-warning:hover, input[type="submit"].button-warning:focus,
+input[type="reset"].button-warning:focus,
+input[type="button"].button-warning:focus, .button.button-warning:focus, input[type="submit"].button-warning:focus,
+input[type="reset"].button-warning:focus,
+input[type="button"].button-warning:focus,
+button.button-warning:hover,
+button.button-warning:focus {
+  background-color: #993400;
+}
+
+.button.button-success, input[type="submit"].button-success,
+input[type="reset"].button-success,
+input[type="button"].button-success,
+button.button-success {
+  color: #fff;
+  background-color: #3D6D99;
+  box-shadow: none;
+}
+
+.button.button-success svg, input[type="submit"].button-success svg,
+input[type="reset"].button-success svg,
+input[type="button"].button-success svg,
+button.button-success svg {
+  fill: #fff;
+}
+
+.button.button-success:hover, input[type="submit"].button-success:hover,
+input[type="reset"].button-success:hover,
+input[type="button"].button-success:hover, input[type="submit"].button-success:focus,
+input[type="reset"].button-success:focus,
+input[type="button"].button-success:focus, .button.button-success:focus, input[type="submit"].button-success:focus,
+input[type="reset"].button-success:focus,
+input[type="button"].button-success:focus,
+button.button-success:hover,
+button.button-success:focus {
+  background-color: #1E5F99;
+}
+
+.circle--clone--list li::before {
+    border: none;
+}
+
+/* message display */
+.messagebar {
+  margin: -30px 0 30px;
+  background: #f9f9f9;
+  padding: 10px 0;
+}
+
+.messagebar ul {
+  list-style: unset;
+  margin-bottom: 1rem;
+}
+
+.messagebar li {
+  font-weight: bold;
+  text-align: center;
+  color: darkblue;
+}
+
+li.success {
+  color: green;
+}
+
+li.warning {
+  color: darkorange;
+}
+
+li.error {
+  color: red;
+}
+
+/* application li */
+li.application {
+  border: 0;
+  padding: 1rem 0 0 0;
+  margin-bottom: 0;
+}
+
+/* float to the right */
+.right {
+  float: right;
+}
+
+/* skills as tags */
+.skills_tag{
+  float:left;
+  border:1px solid #ccc;
+  border-radius: 8px;
+  padding:5px;
+  font-family:Arial;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.skills_tag > span{
+  cursor:pointer;
+  display:block;
+  float:left;
+  color:#fff;
+  background:#537d7b;
+  padding:5px 25px 5px 7px;
+  margin:4px;
+  border-radius: 5px
+}
+
+.skills_tag > span:hover{
+  opacity:0.7;
+}
+
+.skills_tag > span:after{
+ position:absolute;
+ content:"×";
+ padding:2px 5px;
+ margin-left:3px;
+ font-size:13px;
+ font-weight: bold;
+}
+
+.skills_tag > input{
+  background:#eee;
+  border:0;
+  border-radius: 0;
+  margin:4px;
+  padding:7px;
+  width:auto;
+}
+
+.skills {
+  float: left;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.skills > span{
+  display:block;
+  float:left;
+  color:#fff;
+  background:#537d7b;
+  padding:7px;
+  margin:4px;
+  border-radius: 5px
+}
+
+/* highliting errors on forms */
+.error {
+  border: 2px solid #993400;
+}
+
+/* search form */
+.search_form {
+  margin-bottom: 0;
+}
+
+/* model for ajax reques waits */
+#fade {
+    display: none;
+    position:fixed;
+    top: 0%;
+    left: 0%;
+    width: 100%;
+    height: 100%;
+    background-color: #ababab;
+    z-index: 1001;
+    -moz-opacity: 0.8;
+    opacity: .70;
+    filter: alpha(opacity=80);
+}
+
+#modal {
+    display: none;
+    position: fixed;
+    top: 45%;
+    left: 45%;
+    width: 64px;
+    height: 64px;
+    padding:30px 15px 0px;
+    border: 3px solid #ababab;
+    box-shadow:1px 1px 10px #ababab;
+    border-radius:20px;
+    background-color: white;
+    background-repeat: no-repeat;
+    background-position: 50%;
+    z-index: 1002;
+    text-align:center;
+    overflow: auto;
+}

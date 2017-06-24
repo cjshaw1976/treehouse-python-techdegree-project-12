@@ -1,0 +1,11 @@
+{% autoescape off %}
+<p><b>Hi {{ owner.username }},</b></p>
+
+<p>You have recieved a new application for the position '<b>{{ position }}</b>' from the user '<b>{{ user.username }}</b>'</p>
+
+<p>To view the user profile for {{ user.username }}, <a href="http://{{ domain }}{{ profile }}">click here</a>.</p>
+
+<p>To view your project page to accept or reject the application, <a href="http://{{ domain }}{{ page }}">click here</a>.</p>
+
+<p><b>The STB project.</b></p>
+{% endautoescape %}

@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% load static from staticfiles %}
+
+{% block title %}{{ block.super }} | Crop Avatar{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static "css/jquery.guillotine.css" %}">
+{% endblock %}
+{% block js %}
+<script type="text/javascript" src="{% static "js/jquery.guillotine.js" %}"></script>
+<script>
+jQuery(function() {
+  var picture = $('#avatar');
+
+  // Make sure the image is completely loaded before calling the plugin
+  picture.one('load', function(){
+    // Initialize plugin (with custom event)
+    picture.guillotine({eventOnChange: 'guillotinechange', width: 300, height: 400});
+
+    // Display inital data
+    var data = picture.guillotine('getData');
+    for(var key in data) { $('#id_'+key).text(data[key]); }
+
+    // Bind button actions
+    $('#rotate_left').click(function(){ picture.guillotine('rotateLeft'); });
+    $('#rotate_right').click(function(){ picture.guillotine('rotateRight'); });
+    $('#zoom_in').click(function(){ picture.guillotine('zoomIn'); });
+    $('#zoom_out').click(function(){ picture.guillotine('zoomOut'); });
+
+    // Update data on change
+    picture.on('guillotinechange', function(ev, data, action) {
+      data.scale = parseFloat(data.scale.toFixed(4));
+      for(var key in data) { $('#id_'+key).text(data[key]); }
+    });
+  });
+
+  // Make sure the 'load' event is triggered at least once (for cached images)
+  if (picture.prop('complete')) picture.trigger('load')
+});
+</script>
+{% endblock %}
+
+{% block body %}
+<h1>Crop your avatar</h1>
+{% if profile.avatar %}
+<div class="bounds circle--page">
+  <div class="grid-40 centered">
+    <div id='content'>
+
+      <div class='frame'>
+        <img id='avatar' src='{{ profile.avatar.url }}'>
+      </div>
+
+      <div id='controls'>
+        <button id='rotate_left'  type='button' title='Rotate left'> &lt; </button>
+        <button id='zoom_out'     type='button' title='Zoom out'> - </button>
+        <button id='zoom_in'      type='button' title='Zoom in'> + </button>
+        <button id='rotate_right' type='button' title='Rotate right'> &gt; </button>
+      </div>
+    </div>
+    <form method="POST" action="{% url 'profile:profile_crop' %}">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.scale }}
+        {{ form.angle }}
+        {{ form.x }}
+        {{ form.y }}
+        {{ form.w }}
+        {{ form.h }}
+        <input type="submit" class="button-primary" value="Save">
+    </form>
+  </div>
+</div>
+
+{% else %}
+<h2>No avatar uploaded yet</h2>
+{% endif %}
+{% endblock %}

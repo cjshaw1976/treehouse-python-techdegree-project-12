@@ -1,0 +1,8 @@
+{% autoescape off %}
+<p><b>Hi {{ user.username }},</b></p>
+<p>Please click on the link to confirm your registration,</br>
+
+http://{{ domain }}{% url 'profile:activate' uidb64=uid token=token %}</p>
+
+<p><b>The STB project.</b></p>
+{% endautoescape %}

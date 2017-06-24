@@ -1,0 +1,140 @@
+{% extends "layout.html" %}
+{% load project_extras %}
+{% load static from staticfiles %}
+{% load markdown_deux_tags %}
+
+{% block title %}{{ block.super }} | Project: {{ form.title.value|default:"New" }}{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="{% static "js/jquery.autocomplete.js" %}"></script>
+<script>
+jQuery(function() {
+
+  //Comma select skills with autocomplete
+  $('.skill_autocomplete').autocomplete({ serviceUrl: '/ajax/skills/',
+                                          triggerSelectOnValidInput: false,
+                                          autoSelectFirst: true,
+                                          params: {no_user: true},
+                                          onSelect: function (suggestion) { skill_add($(this)); }
+                                          });
+
+  $( document ).on( "autocompleteReturn", ".skill_autocomplete", function (e) {
+    skill_add($(this));
+  });
+
+  // Add skill to list
+  function skill_add(element){
+    if(element.val() && element.parent().children("span:contains('"+ element.val() +"')").length==0) {
+      $("<span/>", {text:element.val(), insertBefore:element});
+    }
+    element.val('');
+    element.autocomplete('clear');
+  }
+
+  // Delete skill from list
+  $(document).on('click', '.skills_tag span', function() {
+    $(this).remove();
+  });
+
+  // On remove click, empty, check for delete and hide.
+  $('.circle--clone--list').on("click", "li:not(:only-child) .position-remove", function(){
+    if ($('.circle--clone--list li:visible').length>1){
+      $(this).siblings().prop('checked', true);
+      var parent = $(this).parent("li");
+      $(parent).find("input:text, textarea").each(function() { $(this).val(''); });
+      parent.hide();
+    }
+  });
+
+  $( "form" ).submit(function( event ) {
+    // Remove empty projects with no id
+    var litms = $('input[id^="id_form-"][id$="-title"]').filter(function() { return !this.value; }).closest('li');
+    $('input[id^="id_form-"][id$="-id"][value=""]', litms).each( function(){
+        $(this).closest('li').remove();
+    });
+
+    // Update count
+    $('#id_form-TOTAL_FORMS').val($('input[id^="id_form-"][id$="-title"]').length);
+
+    // Process skills to arrays for submitting
+    $('.skills_tag').each( function(){
+      console.log($(this));
+      var id = $(this).find("input, textarea, select").prop('id').match(/[\d]+/g);
+      $('span', $(this)).each( function(){
+          $("<input/>", {type:'hidden', name:"form-"+id+"-skill[]", val:$(this).text(), insertBefore:$(this)});
+      });
+
+    });
+  });
+});
+</script>
+{% endblock %}
+
+{% block body %}
+  <form method="POST" class="post-form">
+    {% csrf_token %}
+    <div class="circle--actions--bar">
+      <div class="bounds">
+        <div class="grid-100">
+          <button type="submit" class="button button-primary">Save Project</button>
+          <a class="button button-text" href="{% url 'profile:home' %}">Discard</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="bounds circle--page circle--article">
+      <div class="grid-70">
+        <div class="circle--article--body">
+          <input name="title" type="text" class="circle--input--h1{% if form.title.errors %} error{% endif %}" placeholder="Project Title" required="" autofocus="" maxlength="150" value="{{ form.title.value|default:"" }}" autocomplete="off"/>
+          {{ form.title.errors }}
+          <textarea name="description" placeholder="Project description..." {% if form.description.errors %}class="error"{% endif %} required>{{ form.description.value|default:"" }}</textarea>
+          <p>{% autoescape off %}{% markdown_allowed %}{% endautoescape %}</p>
+          {{ form.description.errors }}
+        </div>
+
+        {{ formset.management_form }}
+        <div class="circle--project--positions">
+          <h2>Positions</h2>
+          <ul class="circle--group--list circle--clone--list">
+          {% for set in formset %}
+            <li>
+              <input name="form-{{ forloop.counter0 }}-{{ set.title.name }}"  id="id_form-{{ forloop.counter0 }}-{{ set.title.name }}" type="text" class="circle--input--h3{% if set.title.errors %} error{% endif %}" placeholder="Position Title" value="{{ set.title.value|default:"" }}" autocomplete="off"/>
+              {{ set.title.errors }}
+              <input name="form-{{ forloop.counter0 }}-{{ set.timeline.name }}"  id="id_form-{{ forloop.counter0 }}-{{ set.timeline.name }}" type="text" class="circle--input--h3{% if set.timeline.errors %} error{% endif %}" placeholder="Position Timeline.  i.e: 10 hours/week" value="{{ set.timeline.value|default:"" }}" autocomplete="off"/>
+              {{ set.timeline.errors }}
+              <div class="skills_tag">
+                {{ set.id.value|skills_tags|safe }}
+                <input type="text" placeholder="Skill" class="skill_autocomplete" id="id_form-{{ forloop.counter0 }}-skills_input">
+              </div>
+              <textarea name="form-{{ forloop.counter0 }}-{{ set.description.name }}" id="id_form-{{ forloop.counter0 }}-{{ set.description.name }}" {% if set.description.errors %}class="error"{% endif %} placeholder="Position Description..." >{{ set.description.value|default:"" }}</textarea>
+              <p>{% autoescape off %}{% markdown_allowed %}{% endautoescape %}</p>
+              {{ set.description.errors }}
+              <input name="form-{{ forloop.counter0 }}-id" value="{{ set.id.value|default:"" }}" id="id_form-{{ forloop.counter0 }}-id" type="hidden">
+              <a class="circle--clone--add">Add Position</a>
+              <a class="position-remove">Remove</a>
+              <input name="form-{{ forloop.counter0 }}-DELETE" id="id_form-{{ forloop.counter0 }}-DELETE" type="checkbox" class="position-delete">
+            </li>
+          {% endfor %}
+          </ul>
+          <button type="submit" class="button button-primary">Save Project</button>
+        </div>
+      </div>
+
+      <div class="grid-25 grid-push-5">
+
+        <div class="circle--secondary--module">
+          <h3>Project Timeline</h3>
+          <textarea name="timeline" class="circle--textarea--input" placeholder="Time estimate" required>{{ form.timeline.value|default:"" }}</textarea>
+          {{ form.timeline.errors }}
+        </div>
+
+        <div class="circle--secondary--module">
+          <h3>Applicant Requirements</h3>
+          <textarea name="requirements" class="circle--textarea--input" required>{{ form.requirements.value|default:"" }}</textarea>
+          {{ form.requirements.errors }}
+        </div>
+
+      </div>
+    </div>
+  </form>
+{% endblock %}

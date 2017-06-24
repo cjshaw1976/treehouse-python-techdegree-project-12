@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% load static from staticfiles %}
+{% load project_extras %}
+
+{% block title %}{{ block.super }} | Recommended{% endblock %}
+
+{% block js %}
+<script>
+jQuery(function() {
+  $(document).on("click", ".position_apply", function(){
+    position = $(this).data('position');
+    project = $(this).data('project');
+    openModal();
+
+    $.ajax({
+        "type": "POST",
+        "dataType": "json",
+        "url": "/project/apply/",
+        "data": {"project": project, "position": position},
+        "beforeSend": function(xhr, settings) {
+            $.ajaxSettings.beforeSend(xhr, settings);
+        },
+        "success": function(result) {
+          if (result['result'] == "success") {
+            location.reload(true);
+          }
+        }
+    }).done(function(data){ closeModal(); });
+  });
+
+});
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="circle--actions--bar">
+  <nav class="bounds">
+    <ul class="circle--pill--list">
+      <li><a href="{% url 'project:applications' %}">Applications</a></li>
+      <li><a href="{% url 'profile:profile' pk=current_user.id %}">Profile</a></li>
+      <li><a class="selected">Recommended</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div class="bounds circle--page">
+  <div class="circle--page--header grid-100">
+    <h2>Recommended Positions</h2>
+  </div>
+
+  <div class="grid-25">
+    <div class="circle--filter circle--secondary--module">
+      <h4>Available Projects</h4>
+      <ul class="circle--filter--list">
+        <li><a href="{% url 'project:recommended' %}{% if show_skill %}?skill={{ show_skill }}{% endif %}" {% if not show_project %}class="selected"{% endif %}>All Projects</a></li>
+        {% for project in projects %}
+        <li><a href="{% url 'project:recommended' %}?project={{ project.title|urlencode|lower }}{% if show_skill %}&skill={{ show_skill }}{% endif %}" {% ifequal show_project|lower project.title|lower %}class="selected"{% endifequal %}>{{ project.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="circle--filter circle--secondary--module">
+      <h4>Skills</h4>
+      <ul class="circle--filter--list">
+        <li><a href="{% url 'project:recommended' %}{% if show_project %}?project={{ show_project }}{% endif %}" {% if not show_skill %}class="selected"{% endif %}>All Skills</a></li>
+        {% for skill in skills %}
+        <li><a href="{% url 'project:recommended' %}?skill={{ skill.skill__title|lower }}{% if show_project %}&project={{ show_project }}{% endif %}" {% ifequal show_skill|lower skill.skill__title|lower %}class="selected"{% endifequal %}>{{ skill.skill__title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="grid-70 grid-push-5">
+    <table class="u-full-width circle--table">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th class="circle--cell--right">Position</th>
+          <th class="circle--cell--right">Apply</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if positions %}
+          {% for position in positions %}
+          <tr>
+            <td>
+              <a href="{% url 'project:project' pk=position.project.id %}#{{ position.title }}"><h3>{{ position.project }}</h3></a>
+            </td>
+            <td class="circle--cell--right">
+              <a class="secondary-label">{{ position.title }}</a>
+            </td>
+            <td><a data-position="{{ position.id }}" data-project="{{ position.project.id }}" class="button button-primary position_apply">Apply</a></td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td align="center" colspan="3"><h2>There are currently no positions that require your skills</h2></td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

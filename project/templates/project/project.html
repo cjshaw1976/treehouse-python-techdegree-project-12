@@ -1,0 +1,209 @@
+{% extends "layout.html" %}
+{% load project_extras %}
+{% load markdown_deux_tags %}
+
+{% block title %}{{ block.super }} | Project: {{ project.title }}{% endblock %}
+
+{% block js %}
+<script>
+jQuery(function() {
+  $(document).on("click", ".position_apply", function(){
+    position = $(this).data('id');
+    openModal();
+
+    $.ajax({
+        "type": "POST",
+        "dataType": "json",
+        "url": "/project/apply/",
+        "data": {"project": {{ project.id }}, "position": position},
+        "beforeSend": function(xhr, settings) {
+            $.ajaxSettings.beforeSend(xhr, settings);
+        },
+        "success": function(result) {
+          if (result['result'] == "success") {
+            $('*[data-id="'+position+'"]').replaceWith('<a class="button button-primary button-inactive">Appied</a>');
+          }
+        }
+    }).done(function(data){ closeModal(); });
+  });
+
+  $(document).on("click", ".position_select", function(){
+    this_li = $(this).closest("li");
+    this_name = $(this).data('name');
+    position = $(this).data('id');
+    openModal();
+
+    $.ajax({
+        "type": "POST",
+        "dataType": "json",
+        "url": "/project/select/",
+        "data": {"project": {{ project.id }}, "position": position},
+        "beforeSend": function(xhr, settings) {
+            $.ajaxSettings.beforeSend(xhr, settings);
+        },
+        "success": function(result) {
+          if (result['result'] == "success") {
+            this_li.siblings().remove();
+            this_li.html('<a class="button button-primary">Selected: '+ this_name +'</a>');
+          }
+        }
+    }).done(function(data){ closeModal(); });
+  });
+
+  $(document).on("click", ".position_reject", function(){
+    this_li = $(this).closest("li");
+    this_name = $(this).data('name');
+    position = $(this).data('id');
+    openModal();
+
+    $.ajax({
+        "type": "POST",
+        "dataType": "json",
+        "url": "/project/reject/",
+        "data": {"project": {{ project.id }}, "position": position},
+        "beforeSend": function(xhr, settings) {
+            $.ajaxSettings.beforeSend(xhr, settings);
+        },
+        "success": function(result) {
+          if (result['result'] == "success") {
+            this_li.html('<a class="button button-warning">Rejected: '+ this_name +'</a>');
+          }
+        }
+    }).done(function(data){ closeModal(); });
+  });
+
+
+  $(document).on("click", ".project_delete", function(){
+    if (confirm("Confirm you want to delete this project.") != true) {
+      return false;
+    }
+
+    $.ajax({
+        "type": "POST",
+        "dataType": "json",
+        "url": "/project/delete/",
+        "data": {"project": {{ project.id }}},
+        "beforeSend": function(xhr, settings) {
+            $.ajaxSettings.beforeSend(xhr, settings);
+        },
+        "success": function(result) {
+          if (result['result'] == "success") {
+            window.location.replace("{% url 'profile:home' %}");
+          }
+        }
+    });
+  });
+});
+</script>
+{% endblock %}
+
+{% block body %}
+{% ifequal current_user project.user %}
+<div class="circle--actions--bar">
+  <div class="bounds">
+    <div class="grid-100">
+      <a class="button" href="{% url 'project:edit' pk=project.pk %}">Edit Project</a>
+      <a class="button button-text project_delete">Delete Project</a>
+    </div>
+  </div>
+</div>
+{% endifequal %}
+
+<div class="bounds circle--page circle--article">
+  <div class="grid-70">
+    <div class="circle--article--header">
+      <h4 class="circle--article--section">Project</h4>
+      <h1 class="circle--article--title">{{ project.title }}</h1>
+      <p class="circle--article--byline">Project Owner: <a href="{% url 'profile:profile' pk=project.user.id %}">{{ project.user }}</a></p>
+    </div>
+
+    <div class="circle--article--body">
+      {{ project.description|markdown }}
+    </div>
+
+    <div class="circle--project--positions">
+      <h2>Positions</h2>
+
+      <ul class="circle--group--list">
+        {% for position in positions %}
+        <li id="{{ position.title }}">
+          <h3>{{ position.title }}</h3>
+          <h5>{{ position.timeline }}</h5>
+          <p>{{ position.description|markdown }}</p>
+          <h4>Skills:</h4>
+          <div class="skills">{{ position.id|skills_tags|safe }}</div>
+          {% if user.is_authenticated %}
+            {% ifnotequal current_user project.user %}
+              {% if position.projectpositionapplication_set.all|position_taken %}
+                {% get_successful position.projectpositionapplication_set.all as result %}
+            <a class="button {% ifequal current_user result.user %}button-primary{% endifequal %}" href="{% url 'profile:profile' pk=result.user.id %}">Position Filled by {{ result.user }}</a>
+              {% elif position.projectpositionapplication_set.all|position_applied:current_user %}
+            <a class="button button-primary button-inactive">Appied</a>
+              {% else %}
+            <a class="button button-primary position_apply" data-id="{{ position.pk }}">Apply</a>
+              {% endif %}
+            {% else %}
+              <h4>Applications:</h4>
+              <ul class="circle--clone--list">
+                {% if position.projectpositionapplication_set.all|position_taken %}
+                  {% get_successful position.projectpositionapplication_set.all as result %}
+                  <li class="application">
+                    <a class="button button-primary" href="{% url 'profile:profile' pk=result.user.id %}">Selected: {{ result.user }}</a>
+                  </li>
+                {% else %}
+                  {% ifequal position.projectpositionapplication_set.all|length 0 %}
+                  <li class="application">
+                    <a class="button">No Applications</a>
+                  </li>
+                  {% endifequal %}
+                  {% for application in applications %}
+                  {% ifequal application.position position %}
+                  <li class="application">
+                    {% if application.status|Applied %}
+                    <a class="button button-primary" href="{% url 'profile:profile' pk=user.id %}">Applied: {{ application.user }}</a>
+                    <span class="right">
+                      <a class="button button-success position_select" data-id="{{ application.id }}" data-name="{{ application.user }}">Select</a>
+                      <a class="button button-warning position_reject" data-id="{{ application.id }}" data-name="{{ application.user }}">Reject</a>
+                    </span>
+                    {% elif application.status|Rejected %}
+                    <a class="button button-warning">Rejected: {{ application.user }}</a>
+                    {% endif %}
+                  </li>
+                  {% endifequal %}
+                  {% endfor %}
+                {% endif %}
+              </ul>
+            {% endifnotequal %}
+          {% else %}
+            <a href="{% url 'profile:signin' %}?next={% url 'project:project' pk=position.project.id %}" class="button button-primary button-inactive">Login to see availibity</a>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="grid-25 grid-push-5">
+    <div class="circle--secondary--module">
+      <h3>Project Needs</h3>
+      <ul class="circle--link--list">
+        {% for position in positions %}
+        <li><a>{{ position.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="circle--secondary--module">
+      <h3>Project Timeline</h3>
+      <p>{{ project.timeline }}</p>
+    </div>
+
+    <div class="circle--secondary--module">
+      <h3>Applicant Requirements</h3>
+      <p>{{ project.requirements }}</p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
