@@ -13,6 +13,8 @@ urlpatterns = [
     url(r'profile/crop/$', views.profile_crop, name='profile_crop'),
     url(r'^ajax/skills/$', views.list_skills, name='list_skills'),
     url(r'^ajax/skills/add/$', views.list_skills_add, name='list_skills_add'),
-    url(r'^ajax/skills/remove/$', views.list_skills_remove, name='list_skills_remove'),
-    url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', views.activate, name='activate'),
+    url(r'^ajax/skills/remove/$', views.list_skills_remove,
+        name='list_skills_remove'),
+    url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        views.activate, name='activate'),
 ]

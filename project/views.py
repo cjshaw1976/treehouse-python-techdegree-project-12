@@ -27,7 +27,8 @@ def project(request, pk):
                   'project': project,
                   'current_user': user,
                   'positions': positions,
-                  'applications': applications })
+                  'applications': applications})
+
 
 @login_required
 def project_recommended(request):
@@ -67,9 +68,10 @@ def project_recommended(request):
               .values('skill__title').annotate(Count('skill_id')))
 
     return render(request, 'project/recommended.html',
-                  { 'projects': projects, 'positions':positions,
-                    'current_user': user, 'skills':skills,
-                    'show_project': show_project, 'show_skill':show_skill })
+                  {'projects': projects, 'positions': positions,
+                   'current_user': user, 'skills': skills,
+                   'show_project': show_project, 'show_skill': show_skill})
+
 
 @login_required
 def project_applications(request):
@@ -118,6 +120,7 @@ def project_applications(request):
                   'applications': applications,
                   'show_applications': show_applications})
 
+
 @login_required
 def project_apply(request):
     """ajax appy for position"""
@@ -129,18 +132,19 @@ def project_apply(request):
     position = (models.ProjectPosition.objects
                 .get(project=project, pk=request.POST.get('position', None)))
 
-    if position != None:
+    if position is not None:
         obj, created = (models.ProjectPositionApplication.objects
                         .get_or_create(position=position,
                                        user=user, status='A'))
         if created:
             # Send email to owner to inform of application
             current_site = get_current_site(request)
-            subject = "[STB Notification] Application recieved for your project position: {}.".format(position)
+            subject = ("[STB Notification] Application recieved for your "
+                       "project position: {}.".format(position))
             message = render_to_string('position_apply_email.html', {
-                'owner':project.user, 'user':user,
+                'owner': project.user, 'user': user,
                 'profile': reverse('profile:profile', args=(user.id,)),
-                'domain':current_site.domain,
+                'domain': current_site.domain,
                 'page': reverse('project:project', args=(project.id,)),
                 'position': position,
             })
@@ -148,8 +152,9 @@ def project_apply(request):
             send_mail(subject, message, 'stb@shawcando.com',
                       [toemail], html_message=message, fail_silently=True)
 
-        return JsonResponse(data = { "result": "success" })
-    return JsonResponse(data = { "result": "failed" })
+        return JsonResponse(data={"result": "success"})
+    return JsonResponse(data={"result": "failed"})
+
 
 @login_required
 def position_select(request):
@@ -161,7 +166,7 @@ def position_select(request):
                 position__project__user=user.id,
                 position__project_id=request.POST.get('project', None),
                 pk=request.POST.get('position', None), status='A')
-                .update(status = 'S'))
+                .update(status='S'))
 
     if position > 0:
         # Send email
@@ -169,9 +174,10 @@ def position_select(request):
                     position__project__user=user.id,
                     position__project_id=request.POST.get('project', None),
                     pk=request.POST.get('position', None), status='S'))
-        subject = "[STB Notification] Application selected for project position: {}.".format(selected.position)
+        subject = ("[STB Notification] Application selected for project "
+                   "position: {}.".format(selected.position))
         message = render_to_string('position_select_email.html', {
-            'user':selected.user, 'position': selected.position,
+            'user': selected.user, 'position': selected.position,
         })
         toemail = selected.user.email
         send_mail(subject, message, 'stb@shawcando.com',
@@ -182,20 +188,22 @@ def position_select(request):
                     .filter(position=selected.position, status='A'))
 
         for application in rejected:
-            application.status='R'
+            application.status = 'R'
             application.save()
 
             # Send email to user to inform of rejection
-            subject = "[STB Notification] Application not selected for project position: {}.".format(application.position)
+            subject = ("[STB Notification] Application not selected for "
+                       "project position: {}.".format(application.position))
             message = render_to_string('position_reject_email.html', {
-                'user':application.user, 'position': application.position,
+                'user': application.user, 'position': application.position,
             })
             toemail = application.user.email
             send_mail(subject, message, 'stb@shawcando.com',
                       [toemail], html_message=message, fail_silently=True)
 
-        return JsonResponse(data = { "result": "success" })
-    return JsonResponse(data = { "result": "failed" })
+        return JsonResponse(data={"result": "success"})
+    return JsonResponse(data={"result": "failed"})
+
 
 @login_required
 def position_reject(request):
@@ -207,22 +215,24 @@ def position_reject(request):
                 position__project__user=user.id,
                 position__project_id=request.POST.get('project', None),
                 pk=request.POST.get('position', None), status='A')
-                .update(status = 'R'))
+                .update(status='R'))
 
     if position > 0:
         # Send email to user to inform of rejection
         application = (models.ProjectPositionApplication.objects
                        .get(pk=request.POST.get('position')))
-        subject = "[STB Notification] Application not selected for project position: {}.".format(application.position)
+        subject = ("[STB Notification] Application not selected for project "
+                   "position: {}.".format(application.position))
         message = render_to_string('position_reject_email.html', {
-            'user':application.user, 'position': application.position,
+            'user': application.user, 'position': application.position,
         })
         toemail = application.user.email
         send_mail(subject, message, 'stb@shawcando.com',
                   [toemail], html_message=message, fail_silently=True)
 
-        return JsonResponse(data = { "result": "success" })
-    return JsonResponse(data = { "result": "failed" })
+        return JsonResponse(data={"result": "success"})
+    return JsonResponse(data={"result": "failed"})
+
 
 @login_required
 def project_delete(request):
@@ -235,14 +245,16 @@ def project_delete(request):
                                 user=user)
     messages.success(request, "Delete project {}".format(project.title))
     project.delete()
-    return JsonResponse(data = { "result": "success" })
+    return JsonResponse(data={"result": "success"})
+
 
 @login_required
 def project_editor(request, pk=None):
     user = request.user
-    project  = models.Project.objects.filter(pk=pk).first()
+    project = models.Project.objects.filter(pk=pk).first()
     if project and project.user != user:
-        messages.error(request, "You cannot edit '{}' as this project does not belong to you.".format(project.title))
+        messages.error(request, "You cannot edit '{}' as this project does "
+                       "not belong to you.".format(project.title))
         return redirect(reverse('profile:home'))
 
     form = forms.ProjectForm(instance=project)

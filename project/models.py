@@ -12,6 +12,7 @@ STATUS_CHOICES = (
     ('R', 'Rejected'),
 )
 
+
 class Project(models.Model):
     """Projects available"""
     user = models.ForeignKey(User)
@@ -35,6 +36,7 @@ class ProjectPosition(models.Model):
     def __str__(self):
         return "{} - {}".format(self.project, self.title)
 
+
 class ProjectPositionSkill(models.Model):
     """Skills needed for the position"""
     position = models.ForeignKey('ProjectPosition', verbose_name="Position")
@@ -46,11 +48,14 @@ class ProjectPositionSkill(models.Model):
     def __str__(self):
         return "{} - {}".format(self.position, self.skill)
 
+
 class ProjectPositionApplication(models.Model):
     """Applications for positions. A = Applied, S = Selected, R = Rejected"""
     position = models.ForeignKey('ProjectPosition', verbose_name="Position")
     user = models.ForeignKey(User)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    status = models.CharField(max_length=1,
+                              choices=STATUS_CHOICES,
+                              default='A')
 
     class Meta:
         unique_together = (('user', 'position'),)

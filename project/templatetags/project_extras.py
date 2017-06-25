@@ -4,16 +4,18 @@ from project.models import ProjectPositionSkill
 
 register = template.Library()
 
+
 @register.filter
 def skills_tags(position):
     """Return the skills for a position"""
     if not position:
-        return '';
+        return ''
     skills = ProjectPositionSkill.objects.filter(position=position)
     skill_list = ""
     for skill in skills:
         skill_list += "<span>"+skill.skill.title+"</span>"
     return skill_list
+
 
 @register.filter
 def position_applied(set, user):
@@ -22,20 +24,23 @@ def position_applied(set, user):
         return True
     return False
 
+
 @register.filter
 def position_taken(set):
     """ Test if a position has been selected"""
     for item in set:
         if item.status == 'S':
-            return True;
+            return True
     return False
+
 
 @register.assignment_tag
 def get_successful(set):
     for item in set:
         if item.status == 'S':
-            return item;
+            return item
     return False
+
 
 @register.filter
 def Applied(status):
@@ -44,12 +49,14 @@ def Applied(status):
         return True
     return False
 
+
 @register.filter
 def Rejected(status):
     """Test if a status is Rejected"""
     if status == 'R':
         return True
     return False
+
 
 @register.filter
 def readable_status(status):
@@ -62,6 +69,7 @@ def readable_status(status):
         return "Applied"
     else:
         return "Unknown"
+
 
 @register.filter
 def status_buttons(status):

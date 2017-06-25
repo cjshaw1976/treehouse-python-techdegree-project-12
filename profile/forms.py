@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 from . import models
 
+    
 class ProfileForm(forms.ModelForm):
     username = forms.CharField(max_length=30, required=True)
     email = forms.EmailField(required=True)
@@ -21,11 +22,13 @@ class ProfileForm(forms.ModelForm):
         cleaned_data = super(ProfileForm, self).clean()
 
         username = self.cleaned_data.get('username')
-        if User.objects.exclude(pk=self.instance.pk).filter(username=username).exists():
+        if (User.objects.exclude(pk=self.instance.pk)
+                .filter(username=username).exists()):
             raise forms.ValidationError(u'Username "%s" is already in use.' % username)
 
         email = self.cleaned_data.get('email')
-        if User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
+        if (User.objects.exclude(pk=self.instance.pk)
+                .filter(email=email).exists()):
             raise forms.ValidationError(u'Email "%s" is already in use.' % email)
 
         return cleaned_data
@@ -34,19 +37,19 @@ class ProfileForm(forms.ModelForm):
 class SubscriberForm(UserCreationForm):
     email = forms.EmailField(
         required=True,
-        widget=forms.TextInput(attrs={'class':'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     username = forms.CharField(
         required=True,
-        widget=forms.TextInput(attrs={'class':'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     password1 = forms.CharField(
-        widget=forms.TextInput(attrs={'class':'form-control',
-                                      'type':'password'})
+        widget=forms.TextInput(attrs={'class': 'form-control',
+                                      'type': 'password'})
     )
     password2 = forms.CharField(
-        widget=forms.TextInput(attrs={'class':'form-control',
-                                      'type':'password'})
+        widget=forms.TextInput(attrs={'class': 'form-control',
+                                      'type': 'password'})
     )
 
     # make email unique
