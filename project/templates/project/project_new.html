@@ -41,7 +41,7 @@ jQuery(function() {
     if ($('.circle--clone--list li:visible').length>1){
       $(this).siblings().prop('checked', true);
       var parent = $(this).parent("li");
-      $(parent).find("input:text, textarea").each(function() { $(this).val(''); });
+      $(parent).find("input:text, textarea").each(function() { $(this).val('remove'); });
       parent.hide();
     }
   });
