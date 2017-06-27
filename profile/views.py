@@ -240,7 +240,7 @@ def profile_crop(request):
                 'h': float(form.cleaned_data['h'])
             }
             cropper(original_image, crop_coords)
-            return HttpResponseRedirect(reverse('profile:profile'))
+            return HttpResponseRedirect(reverse('profile:my_profile'))
 
     return render(request, 'profile/profile_crop.html',
                   {'user': user, 'profile': profile, 'form': form})
