@@ -91,11 +91,11 @@ def project_applications(request):
     if request.GET.get('position'):
         show_position = request.GET.get('position')
         positions = (models.ProjectPosition.objects
-                     .filter(project__in=my_projects,
+                     .filter(project__in=projects,
                              title__iexact=show_position))
     else:
         positions = (models.ProjectPosition.objects
-                     .filter(project__in=my_projects))
+                     .filter(project__in=projects))
 
     show_applications = None
     if request.GET.get('application'):
