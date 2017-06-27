@@ -41,9 +41,9 @@ jQuery(function() {
 {% endblock %}
 
 {% block body %}
-<h1>Crop your avatar</h1>
-{% if profile.avatar %}
 <div class="bounds circle--page">
+{% if profile.avatar %}
+  <h1>Crop your avatar</h1>
   <div class="grid-40 centered">
     <div id='content'>
 
@@ -70,9 +70,9 @@ jQuery(function() {
         <input type="submit" class="button-primary" value="Save">
     </form>
   </div>
-</div>
 
 {% else %}
-<h2>No avatar uploaded yet</h2>
+  <h2>No avatar uploaded yet</h2>
 {% endif %}
+</div>
 {% endblock %}
