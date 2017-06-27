@@ -120,7 +120,7 @@ jQuery(function() {
               <p>{{ apply.position.project.title }}</p>
             </td>
             <td class="circle--cell--right">
-              <a class="secondary-label" href="{% url 'project:project' pk=apply.position.project.id %}">{{ apply.position.title }}</a>
+              <a class="secondary-label" href="{% url 'project:project' pk=apply.position.project.id %}#{{ apply.position.title }}">{{ apply.position.title }}</a>
             </td>
             <td data-position="{{ apply.id }}" data-project="{{ apply.position.project.id }}">
               {{ apply.status|status_buttons|safe }}

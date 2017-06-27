@@ -160,7 +160,7 @@ jQuery(function() {
                   {% ifequal application.position position %}
                   <li class="application">
                     {% if application.status|Applied %}
-                    <a class="button button-primary" href="{% url 'profile:profile' pk=user.id %}">Applied: {{ application.user }}</a>
+                    <a class="button button-primary" href="{% url 'profile:profile' pk=application.user.id %}">Applied: {{ application.user }}</a>
                     <span class="right">
                       <a class="button button-success position_select" data-id="{{ application.id }}" data-name="{{ application.user }}">Select</a>
                       <a class="button button-warning position_reject" data-id="{{ application.id }}" data-name="{{ application.user }}">Reject</a>
@@ -189,7 +189,7 @@ jQuery(function() {
       <h3>Project Needs</h3>
       <ul class="circle--link--list">
         {% for position in positions %}
-        <li><a>{{ position.title }}</a></li>
+        <li><a href="#{{ position.title }}">{{ position.title }}</a></li>
         {% endfor %}
       </ul>
     </div>
