@@ -79,6 +79,13 @@ def sign_in(request):
                     if redirect:
                         return HttpResponseRedirect(redirect)
                     else:
+                        profile = models.Profile.objects.get(user=user)
+                        if not profile.bio or not profile.avatar:
+                            messages.success(request,("Please make sure your "
+                            "profile is complete by entering a bio and "
+                            "uploading a profile image."))
+                            return HttpResponseRedirect(reverse(
+                                                'profile:my_profile'))
                         return HttpResponseRedirect(reverse('profile:home'))
 
     return render(request, 'profile/signin.html', {'form': form,
@@ -233,7 +240,7 @@ def profile_crop(request):
                 'h': float(form.cleaned_data['h'])
             }
             cropper(original_image, crop_coords)
-            return HttpResponseRedirect(reverse('profile:home'))
+            return HttpResponseRedirect(reverse('profile:profile'))
 
     return render(request, 'profile/profile_crop.html',
                   {'user': user, 'profile': profile, 'form': form})
