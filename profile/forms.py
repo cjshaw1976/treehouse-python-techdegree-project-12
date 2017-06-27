@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 from . import models
 
-    
+
 class ProfileForm(forms.ModelForm):
     username = forms.CharField(max_length=30, required=True)
     email = forms.EmailField(required=True)
@@ -52,11 +52,22 @@ class SubscriberForm(UserCreationForm):
                                       'type': 'password'})
     )
 
-    # make email unique
+    # check username unique
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError(
+                "The user name '{}' already exists. Please try another."
+                .format(username))
+        return username
+
+    # check email unique
     def clean_email(self):
         email = self.cleaned_data['email']
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("The email already taken.")
+            raise forms.ValidationError(
+                "The email '{}' is already taken. Please use another."
+                .format(email))
         return email
 
 
